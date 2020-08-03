@@ -1,2 +1,2 @@
-# lcls_cu_inj_surrogate
+# lcls-cu-inj-surrogate
 cu_inj_surrogate
