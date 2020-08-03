@@ -1,0 +1,94 @@
+xopt:
+  output_path: . 
+  #output_path: /global/cfs/cdirs/m669/cmayes/impact_datasets/cu_inj_surrogate/frontend/v1_cnsga
+  verbose: true
+  algorithm: cnsga
+  
+algorithm:
+  name: cnsga
+  function: xopt.cnsga.cnsga
+  options:
+    max_generations: 1000
+    population_size: 320
+    crossover_probability: 0.9
+    mutation_probability: 1.0 
+    selection: auto
+    verbose: true
+    #population: /global/cfs/cdirs/m669/cmayes/impact_datasets/cu_inj_surrogate/frontend/v1_cnsga/pop_10.json
+
+simulation:
+  name: impact_with_distgen
+  evaluate: impact.evaluate_impact_with_distgen
+  options:
+    verbose: false
+    workdir: /global/cscratch1/sd/cmayes/
+    archive_path: /global/cfs/cdirs/m669/cmayes/impact_datasets/cu_inj_surrogate/frontend/v1_cnsga/archive/
+    
+vocs:
+  name: LCLS cu_inj Impact-T and Disgten frontend optimization v1
+  description: First dataset for lcls_cu_inj_frontend
+  simulation: impact_with_distgen
+  templates:
+    impact_config: ../impact/ImpactT.yaml
+    distgen_input_file: ../distgen/distgen.yaml
+          #impact_config: homes/c/cmayes/GitHub/lcls-lattice/impact/models/cu_inj/ImpactT.yaml
+          #distgen_input_file: /global/homes/c/cmayes/GitHub/lcls-lattice/distgen/models/cu_inj/distgen.yaml
+  
+  variables:
+
+    # Distgen
+    distgen:r_dist:sigma_xy:value: [0.2, 0.5] # mm, diameter = 3*this, because cutoff is 1.5 sigma. This is therefore [0.6, 1.5] mm
+    distgen:t_dist:length:value: [3.0, 12.0]  # ps tukey length = 1.65 * FWHM /ps, with FWHM range [1.85, 7] ps
+
+    # Gun
+    #GUN:dtheta0_deg: [280, 320]
+    
+    # Solenoid
+    SOL1:solenoid_field_scale: [0.15, 0.3] # T peak field
+  
+    # Corrector Quads:
+    CQ01:b1_gradient: [ -0.01, 0.01 ]   # T/m
+    SQ01:b1_gradient: [ -0.01, 0.01 ]   # T/m
+  
+    # L0A
+    L0A_phase:dtheta0_deg: [-25, 10]  
+    
+    
+    # L0B
+   # L0B:dtheta0_deg: [-20, 20]
+   # L0B_scale:rf_field_scale: [30.0e+6, 40.0e+6]
+    
+  linked_variables: null
+  
+  constants:
+    # Distgen
+    distgen:n_particle: 10000
+    distgen:total_charge:value: 250 # pC 
+ 
+    # Impact-T
+    L0A_scale:voltage: 58.0e+6 # V
+    L0A_scale:voltage: 70.0e+6 # V
+    
+    # Impact-T options
+    #
+    #total_charge: 0 # Impact-T, turn SC off for testing
+    stop: 4.615   # m just after YAG03
+    timeout: 3600
+    
+    header:Nx: 32
+    header:Ny: 32
+    header:Nz: 32
+    
+  objectives:
+    end_norm_emit_x: MINIMIZE
+    end_sigma_z: MINIMIZE
+  
+  constraints:
+    end_sigma_z: [LESS_THAN, 0.0015]
+    end_norm_emit_x: [LESS_THAN, 1.0e-6]
+    end_mean_kinetic_energy: [GREATER_THAN, 50.0e+6]
+    #end_higher_order_energy_spread: [LESS_THAN, 5000.0]
+    end_n_particle_loss: [LESS_THAN, 1]
+
+
+  
